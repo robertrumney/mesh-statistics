@@ -22,18 +22,25 @@ public class MeshStatistics : EditorWindow
     // List to store the mesh info
     private List<MeshInfo> meshInfoList = new List<MeshInfo>();
 
-    // Create a menu item in the Unity editor for the Mesh Analyzer
-    [MenuItem("Tools/Mesh Analyzer")]
+    // Option to include skinned meshes
+    private bool includeSkinnedMeshes = false;
+
+    // Create a menu item in the Unity editor for the Mesh Statistics
+    [MenuItem("Tools/Mesh Statistics")]
     private static void ShowWindow()
     {
         var window = GetWindow<MeshStatistics>();
-        window.titleContent = new GUIContent("Mesh Analyzer");
+        window.titleContent = new GUIContent("Mesh Statistics");
         window.Show();
     }
 
     // Analyze all meshes in the scene
     private void OnGUI()
     {
+        GUILayout.Label("Mesh Statistics", EditorStyles.boldLabel);
+
+        includeSkinnedMeshes = EditorGUILayout.Toggle("Include Skinned Meshes", includeSkinnedMeshes);
+
         if (GUILayout.Button("Analyze Meshes"))
         {
             AnalyzeMeshes();
@@ -41,6 +48,7 @@ public class MeshStatistics : EditorWindow
 
         if (meshInfoList.Count > 0)
         {
+            GUILayout.Space(10);
             GUILayout.Label("Meshes by poly count (highest to lowest):", EditorStyles.boldLabel);
 
             // Display the list of meshes
@@ -65,7 +73,7 @@ public class MeshStatistics : EditorWindow
         // Find all mesh filters in the scene
         MeshFilter[] meshFilters = FindObjectsOfType<MeshFilter>();
 
-        // Loop through each mesh filter
+        // Analyze MeshFilters
         foreach (MeshFilter meshFilter in meshFilters)
         {
             if (meshFilter.sharedMesh != null)
@@ -75,6 +83,26 @@ public class MeshStatistics : EditorWindow
                 GameObject obj = meshFilter.gameObject;
 
                 meshInfoList.Add(new MeshInfo(meshName, polyCount, obj));
+            }
+        }
+
+        // If including skinned meshes
+        if (includeSkinnedMeshes)
+        {
+            // Find all skinned mesh renderers in the scene
+            SkinnedMeshRenderer[] skinnedMeshRenderers = FindObjectsOfType<SkinnedMeshRenderer>();
+
+            // Analyze SkinnedMeshRenderers
+            foreach (SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRenderers)
+            {
+                if (skinnedMeshRenderer.sharedMesh != null)
+                {
+                    int polyCount = skinnedMeshRenderer.sharedMesh.triangles.Length / 3;
+                    string meshName = skinnedMeshRenderer.sharedMesh.name;
+                    GameObject obj = skinnedMeshRenderer.gameObject;
+
+                    meshInfoList.Add(new MeshInfo(meshName, polyCount, obj));
+                }
             }
         }
 
