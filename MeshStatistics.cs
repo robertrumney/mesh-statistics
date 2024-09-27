@@ -25,6 +25,9 @@ public class MeshStatistics : EditorWindow
     // Option to include skinned meshes
     private bool includeSkinnedMeshes = false;
 
+    // Scroll position for the scroll view
+    private Vector2 scrollPosition;
+
     // Create a menu item in the Unity editor for the Mesh Statistics
     [MenuItem("Tools/Mesh Statistics")]
     private static void ShowWindow()
@@ -52,7 +55,6 @@ public class MeshStatistics : EditorWindow
             GUILayout.Label("Meshes by poly count (highest to lowest):", EditorStyles.boldLabel);
 
             // Start the scroll view
-            Vector2 scrollPosition = Vector2.zero;
             scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.Height(300)); // Set height as needed
 
             // Display the list of meshes
@@ -71,7 +73,6 @@ public class MeshStatistics : EditorWindow
             EditorGUILayout.EndScrollView();
         }
     }
-
 
     // Function to analyze meshes in the scene
     private void AnalyzeMeshes()
