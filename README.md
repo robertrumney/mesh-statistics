@@ -5,6 +5,7 @@ A Unity Editor tool that analyzes all meshes in your scene and lists them by pol
 ## Features
 
 - **Analyze Meshes**: Quickly scan all meshes in the current scene.
+- **Include Skinned Meshes**: Option to include skinned meshes in the analysis.
 - **Sort by Poly Count**: Lists meshes from highest to lowest polygon count.
 - **Select Meshes**: Easily select a mesh in the scene directly from the list.
 
@@ -26,16 +27,21 @@ A Unity Editor tool that analyzes all meshes in your scene and lists them by pol
 
    `Tools -> Mesh Statistics`
 
-2. **Analyze Meshes**
+2. **Include Skinned Meshes (Optional)**
 
-   In the Mesh Statistics window that appears, click the **Analyze Meshes** button.
+   - In the Mesh Statistics window, you'll see a checkbox labeled **Include Skinned Meshes**.
+   - Check this box if you want to include skinned meshes in the analysis.
 
-3. **View Results**
+3. **Analyze Meshes**
 
-   - A list of all meshes in the scene will be displayed, ordered by polygon count from highest to lowest.
+   Click the **Analyze Meshes** button.
+
+4. **View Results**
+
+   - A list of all meshes (and skinned meshes if included) in the scene will be displayed, ordered by polygon count from highest to lowest.
    - Each entry shows the mesh name and its polygon count.
 
-4. **Select a Mesh**
+5. **Select a Mesh**
 
    - Click the **Select** button next to a mesh to highlight it in the Hierarchy and Inspector.
    - This allows you to quickly locate and inspect high-poly meshes.
