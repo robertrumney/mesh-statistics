@@ -26,7 +26,7 @@ public class MeshStatistics : EditorWindow
     [MenuItem("Tools/Mesh Analyzer")]
     private static void ShowWindow()
     {
-        var window = GetWindow<MeshAnalyzer>();
+        var window = GetWindow<MeshStatistics>();
         window.titleContent = new GUIContent("Mesh Analyzer");
         window.Show();
     }
