@@ -51,6 +51,10 @@ public class MeshStatistics : EditorWindow
             GUILayout.Space(10);
             GUILayout.Label("Meshes by poly count (highest to lowest):", EditorStyles.boldLabel);
 
+            // Start the scroll view
+            Vector2 scrollPosition = Vector2.zero;
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.Height(300)); // Set height as needed
+
             // Display the list of meshes
             foreach (MeshInfo info in meshInfoList)
             {
@@ -62,8 +66,12 @@ public class MeshStatistics : EditorWindow
                 }
                 GUILayout.EndHorizontal();
             }
+
+            // End the scroll view
+            EditorGUILayout.EndScrollView();
         }
     }
+
 
     // Function to analyze meshes in the scene
     private void AnalyzeMeshes()
