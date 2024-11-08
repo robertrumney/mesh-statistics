@@ -1,48 +1,51 @@
 using UnityEditor;
 using UnityEngine;
+
 using System.Collections.Generic;
 
 public class MeshStatistics : EditorWindow
 {
-    // Holds information about each mesh
     private class MeshInfo
     {
         public string name;
         public int polyCount;
+        public Mesh mesh;
         public GameObject gameObject;
 
-        public MeshInfo(string name, int polyCount, GameObject gameObject)
+        public MeshInfo(string name, int polyCount, Mesh mesh, GameObject gameObject)
         {
             this.name = name;
             this.polyCount = polyCount;
+            this.mesh = mesh;
             this.gameObject = gameObject;
         }
     }
 
-    // List to store the mesh info
     private List<MeshInfo> meshInfoList = new List<MeshInfo>();
-
-    // Option to include skinned meshes
     private bool includeSkinnedMeshes = false;
-
-    // Scroll position for the scroll view
     private Vector2 scrollPosition;
 
-    // Create a menu item in the Unity editor for the Mesh Statistics
+    private enum AnalysisScope
+    {
+        Scene,
+        Project
+    }
+
+    private AnalysisScope scope = AnalysisScope.Scene;
+
     [MenuItem("Tools/Mesh Statistics")]
     private static void ShowWindow()
     {
-        var window = GetWindow<MeshStatistics>();
-        window.titleContent = new GUIContent("Mesh Statistics");
+        var window = GetWindow<MeshStatistics>("Mesh Statistics");
         window.Show();
     }
 
-    // Analyze all meshes in the scene
     private void OnGUI()
     {
         GUILayout.Label("Mesh Statistics", EditorStyles.boldLabel);
 
         includeSkinnedMeshes = EditorGUILayout.Toggle("Include Skinned Meshes", includeSkinnedMeshes);
+        scope = (AnalysisScope)EditorGUILayout.EnumPopup("Analysis Scope", scope);
 
         if (GUILayout.Button("Analyze Meshes"))
         {
@@ -53,69 +56,81 @@ public class MeshStatistics : EditorWindow
         {
             GUILayout.Space(10);
             GUILayout.Label("Meshes by poly count (highest to lowest):", EditorStyles.boldLabel);
+            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.Height(300));
 
-            // Start the scroll view
-            scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, false, true, GUILayout.Height(300)); // Set height as needed
-
-            // Display the list of meshes
             foreach (MeshInfo info in meshInfoList)
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.Label(info.name + " - " + info.polyCount + " polys");
-                if (GUILayout.Button("Select"))
+                if (scope == AnalysisScope.Scene)
                 {
-                    Selection.activeGameObject = info.gameObject;
+                    if (GUILayout.Button("Select"))
+                    {
+                        Selection.activeGameObject = info.gameObject;
+                    }
                 }
+                else if (scope == AnalysisScope.Project)
+                {
+                    if (GUILayout.Button("Ping in Project"))
+                    {
+                        EditorGUIUtility.PingObject(info.mesh);
+                    }
+                }
+
                 GUILayout.EndHorizontal();
             }
 
-            // End the scroll view
             EditorGUILayout.EndScrollView();
         }
     }
 
-    // Function to analyze meshes in the scene
     private void AnalyzeMeshes()
     {
         meshInfoList.Clear();
+        IEnumerable<MeshFilter> meshFilters;
+        IEnumerable<SkinnedMeshRenderer> skinnedMeshRenderers;
 
-        // Find all mesh filters in the scene
-        MeshFilter[] meshFilters = FindObjectsOfType<MeshFilter>();
+        if (scope == AnalysisScope.Project)
+        {
+            meshFilters = Resources.FindObjectsOfTypeAll<MeshFilter>();
+            skinnedMeshRenderers = Resources.FindObjectsOfTypeAll<SkinnedMeshRenderer>();
+        }
+        else
+        {
+            meshFilters = FindObjectsOfType<MeshFilter>();
+            skinnedMeshRenderers = FindObjectsOfType<SkinnedMeshRenderer>();
+        }
 
-        // Analyze MeshFilters
+        AddMeshesFromFilters(meshFilters);
+        if (includeSkinnedMeshes)
+        {
+            AddMeshesFromSkinnedRenderers(skinnedMeshRenderers);
+        }
+
+        meshInfoList.Sort((a, b) => b.polyCount.CompareTo(a.polyCount));
+    }
+
+    private void AddMeshesFromFilters(IEnumerable<MeshFilter> meshFilters)
+    {
         foreach (MeshFilter meshFilter in meshFilters)
         {
             if (meshFilter.sharedMesh != null)
             {
                 int polyCount = meshFilter.sharedMesh.triangles.Length / 3;
-                string meshName = meshFilter.sharedMesh.name;
-                GameObject obj = meshFilter.gameObject;
-
-                meshInfoList.Add(new MeshInfo(meshName, polyCount, obj));
+                meshInfoList.Add(new MeshInfo(meshFilter.sharedMesh.name, polyCount, meshFilter.sharedMesh, meshFilter.gameObject));
             }
         }
+    }
 
-        // If including skinned meshes
-        if (includeSkinnedMeshes)
+    private void AddMeshesFromSkinnedRenderers(IEnumerable<SkinnedMeshRenderer> skinnedMeshRenderers)
+    {
+        foreach (SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRenderers)
         {
-            // Find all skinned mesh renderers in the scene
-            SkinnedMeshRenderer[] skinnedMeshRenderers = FindObjectsOfType<SkinnedMeshRenderer>();
-
-            // Analyze SkinnedMeshRenderers
-            foreach (SkinnedMeshRenderer skinnedMeshRenderer in skinnedMeshRenderers)
+            if (skinnedMeshRenderer.sharedMesh != null)
             {
-                if (skinnedMeshRenderer.sharedMesh != null)
-                {
-                    int polyCount = skinnedMeshRenderer.sharedMesh.triangles.Length / 3;
-                    string meshName = skinnedMeshRenderer.sharedMesh.name;
-                    GameObject obj = skinnedMeshRenderer.gameObject;
-
-                    meshInfoList.Add(new MeshInfo(meshName, polyCount, obj));
-                }
+                int polyCount = skinnedMeshRenderer.sharedMesh.triangles.Length / 3;
+                meshInfoList.Add(new MeshInfo(skinnedMeshRenderer.sharedMesh.name, polyCount, skinnedMeshRenderer.sharedMesh, skinnedMeshRenderer.gameObject));
             }
         }
-
-        // Sort the list by poly count in descending order
-        meshInfoList.Sort((a, b) => b.polyCount.CompareTo(a.polyCount));
     }
 }
