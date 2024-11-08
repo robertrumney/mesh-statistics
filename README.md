@@ -52,10 +52,6 @@ A Unity Editor tool that analyzes all meshes in your scene or entire project and
 - **Performance Optimization**: Identify and optimize high-poly meshes to improve game performance.
 - **Workflow Efficiency**: Save time by quickly locating and handling meshes that may need attention.
 
-## Requirements
-
-- **Unity Editor**: Version 2019.1 or higher is recommended for best compatibility.
-
 ## Contributing
 
 Contributions are welcome! If you have suggestions or improvements, feel free to submit a pull request or open an issue.
