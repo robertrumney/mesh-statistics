@@ -21,7 +21,8 @@ public class MeshStatistics : EditorWindow
         }
     }
 
-    private List<MeshInfo> meshInfoList = new List<MeshInfo>();
+    private readonly List<MeshInfo> meshInfoList = new List<MeshInfo>();
+
     private bool includeSkinnedMeshes = false;
     private Vector2 scrollPosition;
 
